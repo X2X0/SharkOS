@@ -1,12 +1,21 @@
 [BITS 32]
 
-; --------------------------------------
-; Paging Setup for Long Mode (64-bit)
-; --------------------------------------
 setup_paging:
     ; Clear all page table entries
     mov edi, pml4_table
     mov ecx, 4096 / 4            ; 4096 bytes / 4 bytes per dword
+    xor eax, eax
+    rep stosd
+
+    ; Clear PDP table
+    mov edi, pdp_table
+    mov ecx, 4096 / 4
+    xor eax, eax
+    rep stosd
+
+    ; Clear PD table
+    mov edi, pd_table
+    mov ecx, 4096 / 4
     xor eax, eax
     rep stosd
 
@@ -23,7 +32,7 @@ setup_paging:
 
 .setup_pd:
     stosd                          ; Write entry
-    add edi, 4                     ; Next entry
+    add edi, 4                     ; Skip high 32 bits
     add eax, 0x200000              ; Next 2MB frame
     loop .setup_pd
 
