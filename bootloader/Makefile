@@ -78,7 +78,7 @@ $(BOOTLOADER_BIN): $(STAGE1_BIN) $(STAGE2_BIN)
 	@cat $(STAGE1_BIN) $(STAGE2_BIN) > $(BOOTLOADER_BIN)
 	@echo "✅ Bootloader created: $(BOOTLOADER_BIN)"
 
-$(STAGE1_BIN): $(BOOTLOADER_DIR)/stage1.asm $(BOOTLOADER_DIR)/animation.asm \
+$(STAGE1_BIN): $(BOOTLOADER_DIR)/stage1.asm $(BOOTLOADER_DIR)/vesa_logo.asm \
                $(BOOTLOADER_DIR)/print.asm $(BOOTLOADER_DIR)/kernel_loader.asm
 	@echo "🔧 Assembling Stage 1 (MBR)..."
 	@$(ASM) $(ASMFLAGS) -o $(STAGE1_BIN) $(BOOTLOADER_DIR)/stage1.asm
@@ -119,6 +119,7 @@ $(SHARKOS_IMG): $(BOOTLOADER_BIN) $(KERNEL_BIN)
 	@dd if=/dev/zero of=$(SHARKOS_IMG) bs=1M count=10 2>/dev/null
 	@dd if=$(BOOTLOADER_BIN) of=$(SHARKOS_IMG) bs=512 count=1 conv=notrunc 2>/dev/null
 	@dd if=$(KERNEL_BIN) of=$(SHARKOS_IMG) bs=512 seek=10 conv=notrunc 2>/dev/null
+	@dd if=$(BOOTLOADER_DIR)/sharkos_logo.bmp of=$(SHARKOS_IMG) bs=512 seek=100 conv=notrunc 2>/dev/null
 	@echo "✅ Disk image created: $(SHARKOS_IMG)"
 
 # =============================================================================
@@ -383,8 +384,8 @@ check-deps:
 
 .PHONY: demo
 demo: all
-	@echo "🦈 SharkOS Demo Mode - Launching with animation..."
-	@echo "   Watch for the SHARK animation during boot!"
+	@echo "🦈 SharkOS Demo Mode - Launching with VESA graphics logo..."
+	@echo "   Watch for the SharkOS logo during boot!"
 	@$(QEMU) -drive format=raw,file=$(SHARKOS_IMG) -m 512M -cpu qemu64 -boot order=c
 
 # Prevent deletion of intermediate files
